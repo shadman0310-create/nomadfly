@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>NomadFly</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+margin:0;
+padding-bottom:80px;
+}
+
+/* NAVBAR */
+
+nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+background:#020617;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+color:#38bdf8;
+}
+
+.menu{
+display:flex;
+gap:10px;
+}
+
+.login{
+background:transparent;
+border:1px solid #38bdf8;
+color:#38bdf8;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.signup{
+background:#38bdf8;
+border:none;
+padding:6px 12px;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* HERO */
+
+.hero{
+text-align:center;
+margin-top:70px;
+}
+
+.search-box{
+background:#1e293b;
+display:inline-block;
+padding:25px;
+border-radius:10px;
+margin-top:25px;
+}
+
+/* ROW */
+
+.row{
+display:flex;
+gap:10px;
+margin-bottom:10px;
+}
+
+/* INPUT */
+
+input{
+padding:10px;
+border-radius:6px;
+border:none;
+flex:1;
+}
+
+/* AUTOCOMPLETE */
+
+.autocomplete{
+position:relative;
+flex:1;
+}
+
+.suggestions{
+position:absolute;
+background:#020617;
+width:100%;
+border-radius:6px;
+max-height:200px;
+overflow-y:auto;
+}
+
+.suggestions div{
+padding:10px;
+cursor:pointer;
+}
+
+.suggestions div:hover{
+background:#1e293b;
+}
+
+/* SWAP */
+
+.swap{
+width:40px;
+background:#38bdf8;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* PASSENGERS */
+
+.passengers{
+background:#0f172a;
+padding:10px;
+border-radius:6px;
+cursor:pointer;
+}
+
+.passenger-panel{
+display:none;
+background:#0f172a;
+padding:15px;
+border-radius:10px;
+margin-top:10px;
+}
+
+.passenger-row{
+display:flex;
+justify-content:space-between;
+margin-bottom:10px;
+}
+
+/* CABIN SELECT */
+
+select{
+padding:6px;
+border-radius:6px;
+border:none;
+background:#1e293b;
+color:white;
+}
+
+/* SEARCH */
+
+.search{
+margin-top:10px;
+padding:10px 20px;
+border:none;
+border-radius:6px;
+background:#38bdf8;
+font-weight:bold;
+cursor:pointer;
+}
+
+/* BOTTOM NAV */
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+left:0;
+width:100%;
+background:#020617;
+display:flex;
+justify-content:space-around;
+padding:12px 0;
+border-top:1px solid #1e293b;
+}
+
+.nav-item{
+color:white;
+cursor:pointer;
+}
+
+.nav-item:hover{
+color:#38bdf8;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<nav>
+
+<div class="logo">NomadFly ✈️</div>
+
+<div class="menu">
+<button class="login">Sign in</button>
+<button class="signup">Sign up</button>
+</div>
+
+</nav>
+
+<div class="hero">
+
+<h1>Find Cheap Flights</h1>
+
+<div class="search-box">
+
+<div class="row">
+
+<div class="autocomplete">
+<input id="from" placeholder="From" oninput="suggest('from')">
+<div class="suggestions" id="from-suggestions"></div>
+</div>
+
+<button class="swap" onclick="swap()">⇄</button>
+
+<div class="autocomplete">
+<input id="to" placeholder="To" oninput="suggest('to')">
+<div class="suggestions" id="to-suggestions"></div>
+</div>
+
+</div>
+
+<div class="row">
+
+<input type="date" id="depart">
+
+<input type="date" id="return">
+
+</div>
+
+<div class="row">
+
+<div class="passengers" onclick="togglePassengers()">
+Passengers & Cabin class
+</div>
+
+</div>
+
+<div class="passenger-panel" id="passengerPanel">
+
+<div class="passenger-row">
+Adults (12+)
+<div>
+<button onclick="change('adults',-1)">-</button>
+<span id="adults">1</span>
+<button onclick="change('adults',1)">+</button>
+</div>
+</div>
+
+<div class="passenger-row">
+Children (2–11)
+<div>
+<button onclick="change('children',-1)">-</button>
+<span id="children">0</span>
+<button onclick="change('children',1)">+</button>
+</div>
+</div>
+
+<div class="passenger-row">
+Infants (0–2)
+<div>
+<button onclick="change('infants',-1)">-</button>
+<span id="infants">0</span>
+<button onclick="change('infants',1)">+</button>
+</div>
+</div>
+
+<br>
+
+<div class="passenger-row">
+Cabin class
+<select id="cabin">
+<option>Economy</option>
+<option>Premium Economy</option>
+<option>Business</option>
+<option>First</option>
+</select>
+</div>
+
+</div>
+
+<button class="search" onclick="searchFlights()">Search Flights</button>
+
+</div>
+
+</div>
+
+<div class="bottom-nav">
+
+<div class="nav-item">🔥 Hot Deals</div>
+<div class="nav-item">🎲 Surprise Trips</div>
+<div class="nav-item">💸 Budget Flights</div>
+
+</div>
+
+<script>
+
+/* AIRPORT LIST */
+
+const airports = [
+"Vilnius",
+"Berlin",
+"Munich",
+"Frankfurt",
+"Paris",
+"Rome",
+"Milan",
+"Barcelona",
+"Madrid",
+"Amsterdam",
+"Dubai",
+"Tokyo"
+]
+
+/* AUTOCOMPLETE */
+
+function suggest(field){
+
+const input=document.getElementById(field)
+const list=document.getElementById(field+"-suggestions")
+
+const value=input.value.toLowerCase()
+
+list.innerHTML=""
+
+if(value.length<2) return
+
+airports.forEach(a=>{
+
+if(a.toLowerCase().includes(value)){
+
+const item=document.createElement("div")
+
+item.innerText=a
+
+item.onclick=()=>{
+input.value=a
+list.innerHTML=""
+}
+
+list.appendChild(item)
+
+}
+
+})
+
+}
+
+/* SWAP */
+
+function swap(){
+
+let from=document.getElementById("from")
+let to=document.getElementById("to")
+
+let temp=from.value
+from.value=to.value
+to.value=temp
+
+}
+
+/* PASSENGERS */
+
+function togglePassengers(){
+
+const panel=document.getElementById("passengerPanel")
+
+panel.style.display=
+panel.style.display==="block"?"none":"block"
+
+}
+
+/* PASSENGER COUNT */
+
+function change(type,val){
+
+let el=document.getElementById(type)
+
+let num=parseInt(el.innerText)
+
+num+=val
+
+if(num<0) num=0
+if(type==="adults" && num<1) num=1
+
+el.innerText=num
+
+}
+
+/* SEARCH */
+
+function searchFlights(){
+
+const from=document.getElementById("from").value
+const to=document.getElementById("to").value
+const cabin=document.getElementById("cabin").value
+
+window.location.href=`flights.html?from=${from}&to=${to}&class=${cabin}`
+
+}
+
+</script>
+
+</body>
+
+</html>

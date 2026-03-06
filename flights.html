@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Flights - NomadFly</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0f172a;
+color:white;
+margin:0;
+}
+
+nav{
+display:flex;
+justify-content:space-between;
+align-items:center;
+padding:20px 40px;
+background:#020617;
+}
+
+.logo{
+font-size:22px;
+font-weight:bold;
+color:#38bdf8;
+}
+
+.container{
+padding:40px;
+}
+
+.flight{
+background:#1e293b;
+padding:20px;
+margin:10px 0;
+border-radius:8px;
+display:flex;
+justify-content:space-between;
+}
+
+.price{
+color:#38bdf8;
+font-weight:bold;
+}
+
+</style>
+</head>
+
+<body>
+
+<nav>
+<div class="logo">NomadFly ✈️</div>
+</nav>
+
+<div class="container">
+
+<h1>Available Flights</h1>
+
+<div id="results"></div>
+
+</div>
+
+<script>
+
+const flights = [
+
+{airline:"Ryanair",from:"Vilnius",to:"Milan",price:29,time:"10:45"},
+{airline:"Wizz Air",from:"Vilnius",to:"Rome",price:35,time:"13:20"},
+{airline:"Air Baltic",from:"Vilnius",to:"Barcelona",price:60,time:"09:00"},
+{airline:"LOT",from:"Vilnius",to:"Tokyo",price:420,time:"07:15"}
+
+];
+
+const params = new URLSearchParams(window.location.search);
+
+let from = params.get("from") || "";
+let to = params.get("to") || "";
+
+from = from.toLowerCase();
+to = to.toLowerCase();
+
+const results = document.getElementById("results");
+
+flights.forEach(flight => {
+
+if(
+flight.from.toLowerCase().includes(from) &&
+flight.to.toLowerCase().includes(to)
+){
+
+results.innerHTML += `
+<div class="flight">
+
+<div>
+<b>${flight.airline}</b><br>
+${flight.from} → ${flight.to}<br>
+Departure: ${flight.time}
+</div>
+
+<div class="price">
+${flight.price}€
+</div>
+
+</div>
+`;
+
+}
+
+});
+
+if(results.innerHTML === ""){
+results.innerHTML = "No flights found.";
+}
+
+</script>
+
+</body>
+</html>
