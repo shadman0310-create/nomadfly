@@ -4,25 +4,25 @@
 <head>
 
 <meta charset="UTF-8">
-
 <title>NomadFly</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#0f172a;
+background:#0b1b36;
 color:white;
 margin:0;
 padding:0;
+padding-bottom:80px;
 }
+
+/* NAV */
 
 nav{
 display:flex;
 justify-content:space-between;
-align-items:center;
 padding:20px 40px;
-background:#020617;
 }
 
 .logo{
@@ -33,16 +33,16 @@ color:#38bdf8;
 
 .auth button{
 margin-left:10px;
-padding:8px 16px;
-border:none;
+padding:8px 14px;
 border-radius:6px;
+border:none;
 cursor:pointer;
 }
 
 .signin{
 background:transparent;
-color:white;
 border:1px solid #38bdf8;
+color:#38bdf8;
 }
 
 .signup{
@@ -50,27 +50,83 @@ background:#38bdf8;
 color:black;
 }
 
+/* HERO */
+
 .hero{
 text-align:center;
 margin-top:120px;
 }
 
-.search-box{
-margin-top:40px;
-display:flex;
-justify-content:center;
-gap:10px;
+.hero h1{
+font-size:36px;
+margin-bottom:30px;
 }
 
-.search-box input{
-padding:12px;
-border-radius:8px;
-border:none;
-width:220px;
+/* SEARCH CARD */
+
+.search-card{
+background:#1c2a44;
+padding:30px;
+border-radius:14px;
+width:500px;
+margin:auto;
 }
+
+/* TRIP TYPE */
+
+.trip-type{
+display:flex;
+gap:10px;
+margin-bottom:15px;
+}
+
+.trip-type button{
+padding:6px 12px;
+border:none;
+border-radius:6px;
+background:#111c30;
+color:white;
+cursor:pointer;
+}
+
+.trip-active{
+background:#38bdf8;
+color:black;
+}
+
+/* ROWS */
+
+.row{
+display:flex;
+gap:10px;
+margin-bottom:10px;
+}
+
+/* INPUTS */
+
+input{
+padding:10px;
+border-radius:6px;
+border:none;
+flex:1;
+}
+
+/* SWAP BUTTON */
+
+.swap{
+background:#38bdf8;
+border:none;
+border-radius:6px;
+cursor:pointer;
+width:40px;
+}
+
+/* SEARCH BUTTON */
 
 .search-btn{
-padding:12px 20px;
+margin-top:15px;
+width:100%;
+padding:12px;
 background:#38bdf8;
 border:none;
 border-radius:8px;
@@ -78,14 +134,32 @@ cursor:pointer;
 font-weight:bold;
 }
 
+/* PASSENGERS */
+
+.passengers{
+margin-top:10px;
+padding:8px;
+background:#111c30;
+border-radius:6px;
+cursor:pointer;
+}
+
+/* AUTOCOMPLETE */
+
+.input-container{
+position:relative;
+flex:1;
+}
+
 .autocomplete{
 position:absolute;
 background:#1e293b;
 border-radius:8px;
-width:220px;
+width:100%;
 max-height:200px;
 overflow-y:auto;
 margin-top:5px;
+z-index:10;
 }
 
 .autocomplete div{
@@ -97,8 +171,16 @@ cursor:pointer;
 background:#334155;
 }
 
-.input-container{
-position:relative;
+/* BOTTOM NAV */
+
+.bottom-nav{
+position:fixed;
+bottom:0;
+width:100%;
+background:#020617;
+display:flex;
+justify-content:space-around;
+padding:16px;
 }
 
 </style>
@@ -109,7 +191,7 @@ position:relative;
 
 <nav>
 
-<div class="logo">NomadFly</div>
+<div class="logo">NomadFly ✈️</div>
 
 <div class="auth">
 <button class="signin">Sign in</button>
@@ -120,46 +202,86 @@ position:relative;
 
 <div class="hero">
 
-<h1>Find cheap flights anywhere</h1>
+<h1>Find Cheap Flights</h1>
 
-<div class="search-box">
+<div class="search-card">
+
+<div class="trip-type">
+
+<button id="roundBtn" class="trip-active">Round trip</button>
+<button id="onewayBtn">One way</button>
+
+</div>
+
+<div class="row">
 
 <div class="input-container">
 <input id="from" placeholder="From">
 <div id="fromResults" class="autocomplete"></div>
 </div>
 
+<button class="swap" onclick="swapAirports()">↔</button>
+
 <div class="input-container">
-<input id="to" placeholder="Destination">
+<input id="to" placeholder="To">
 <div id="toResults" class="autocomplete"></div>
 </div>
 
-<button class="search-btn">Search</button>
+</div>
+
+<div class="row">
+
+<input type="date" id="depart">
+
+<input type="date" id="returnDate">
 
 </div>
+
+<div class="passengers">
+
+Passengers & Cabin class
+
+</div>
+
+<button class="search-btn">Search Flights</button>
+
+</div>
+
+</div>
+
+<div class="bottom-nav">
+
+<div>🔥 Hot Deals</div>
+<div>🎲 Surprise Trips</div>
+<div>💸 Budget Flights</div>
 
 </div>
 
 <script>
 
-let airports = []
+/* LOAD AIRPORTS */
+
+let airports=[]
 
 fetch("airports.json")
-.then(res => res.json())
-.then(data => {
+.then(res=>res.json())
+.then(data=>{
 
-airports = Object.values(data)
+airports=Object.values(data)
 
-console.log("airports loaded:", airports.length)
+console.log("airports loaded:",airports.length)
 
 })
 
+/* SEARCH AIRPORT */
+
 function searchAirports(query){
 
-query = query.toLowerCase()
+query=query.toLowerCase()
 
 return airports
-.filter(a =>
+.filter(a=>
+
 a.name &&
 (
 a.name.toLowerCase().includes(query) ||
@@ -167,31 +289,34 @@ a.city?.toLowerCase().includes(query) ||
 a.country?.toLowerCase().includes(query) ||
 a.iata?.toLowerCase().includes(query)
 )
+
 )
 .slice(0,10)
 
 }
 
-function setupAutocomplete(inputId, resultsId){
+/* AUTOCOMPLETE */
 
-const input = document.getElementById(inputId)
-const resultsBox = document.getElementById(resultsId)
+function setupAutocomplete(inputId,resultsId){
 
-input.addEventListener("input", ()=>{
+const input=document.getElementById(inputId)
+const resultsBox=document.getElementById(resultsId)
 
-const results = searchAirports(input.value)
+input.addEventListener("input",()=>{
 
-resultsBox.innerHTML = ""
+const results=searchAirports(input.value)
+
+resultsBox.innerHTML=""
 
 results.forEach(a=>{
 
-const div = document.createElement("div")
+const div=document.createElement("div")
 
-div.innerText = `${a.city} - ${a.name} (${a.iata})`
+div.innerText=`${a.city} - ${a.name} (${a.iata})`
 
-div.onclick = ()=>{
+div.onclick=()=>{
 
-input.value = `${a.city} (${a.iata})`
+input.value=`${a.city} (${a.iata})`
 
 resultsBox.innerHTML=""
 
@@ -207,6 +332,43 @@ resultsBox.appendChild(div)
 
 setupAutocomplete("from","fromResults")
 setupAutocomplete("to","toResults")
+
+/* SWAP */
+
+function swapAirports(){
+
+let from=document.getElementById("from")
+let to=document.getElementById("to")
+
+let temp=from.value
+from.value=to.value
+to.value=temp
+
+}
+
+/* TRIP TYPE */
+
+const roundBtn=document.getElementById("roundBtn")
+const onewayBtn=document.getElementById("onewayBtn")
+const returnDate=document.getElementById("returnDate")
+
+roundBtn.onclick=()=>{
+
+roundBtn.classList.add("trip-active")
+onewayBtn.classList.remove("trip-active")
+
+returnDate.style.display="block"
+
+}
+
+onewayBtn.onclick=()=>{
+
+onewayBtn.classList.add("trip-active")
+roundBtn.classList.remove("trip-active")
+
+returnDate.style.display="none"
+
+}
 
 </script>
 
