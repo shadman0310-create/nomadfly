@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html>
 
+<html>
+<head>
 
 <script type="module">
 
@@ -21,28 +23,25 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
 
-window.signInWithGoogle = function() {
+window.signInWithGoogle = async function(){
 
-  signInWithPopup(auth, provider)
-    .then((result) => {
+try{
 
-      const user = result.user
+const result = await signInWithPopup(auth, provider)
+const user = result.user
 
-      alert("Logged in as " + user.displayName)
+alert("Logged in as " + user.displayName)
 
-      console.log(user)
+}catch(error){
 
-    })
-    .catch((error) => {
+console.error(error)
+alert(error.message)
 
-      console.error(error)
-
-    })
+}
 
 }
 
 </script>
-<head>
 
 <meta charset="UTF-8">
 <title>NomadFly</title>
