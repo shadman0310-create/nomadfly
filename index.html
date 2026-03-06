@@ -10,7 +10,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth, GoogleAuthProvider, signInWithPopup } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyA...",
+  apiKey: "AIzaSyAyAu8ofSXIgx4LAIGFVnMJL9-xnQIzpa4",
   authDomain: "nomadfly.firebaseapp.com",
   projectId: "nomadfly",
   storageBucket: "nomadfly.firebasestorage.app",
@@ -22,6 +22,16 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const provider = new GoogleAuthProvider();
+
+window.signInWithGoogle = async function(){
+
+  const result = await signInWithPopup(auth, provider)
+
+  alert("Logged in as " + result.user.displayName)
+
+}
+
+</script>
 
 window.signInWithGoogle = async function(){
 
