@@ -37,6 +37,16 @@ background:#38bdf8;
 color:black;
 }
 
+.homeBtn{
+background:#38bdf8;
+color:black;
+border:none;
+padding:10px 14px;
+border-radius:8px;
+cursor:pointer;
+margin-bottom:20px;
+}
+
 </style>
 
 </head>
@@ -44,6 +54,7 @@ color:black;
 <body>
 
 <h1>Flight Results</h1>
+<button class="homeBtn" onclick="goHome()">⬅ Back to Home</button>
 
 <div id="results"></div>
 
@@ -88,7 +99,11 @@ ${flight.airline}
 results.appendChild(div)
 
 })
+function goHome(){
 
+window.location="index.html"
+
+}
 </script>
 
 </body>
