@@ -122,6 +122,7 @@ Sort by:
 <div class="modalBox">
 
 <h2>Flight Details</h2>
+
 <div id="modalContent"></div>
 
 <br>
@@ -132,8 +133,8 @@ Sort by:
 
 <script>
 
-const API_KEY = "YOUR_API_KEY"
-const API_SECRET = "YOUR_API_SECRET"
+const API_KEY = "iHMy08j1HiFxJSbCdvEUJsrl6fp8zYRq"
+const API_SECRET = "erBUAyAYLhxTLbCt"
 
 let allFlights = []
 
@@ -154,12 +155,16 @@ return data.access_token
 
 }
 
-async function searchFlights(from,to,date,token){
+async function searchFlights(from,to,date){
+
+const token = await getToken()
 
 const response = await fetch(
 `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${date}&adults=1`,
 {
-headers:{ Authorization:`Bearer ${token}` }
+headers:{
+Authorization:`Bearer ${token}`
+}
 })
 
 const data = await response.json()
@@ -181,6 +186,7 @@ document.getElementById("results").innerHTML =
 "Please search flights from the home page."
 
 return
+
 }
 
 const from = fromText.match(/\((.*?)\)/)[1]
@@ -188,7 +194,6 @@ const to = toText.match(/\((.*?)\)/)[1]
 
 allFlights = []
 
-const token = await getToken()
 const baseDate = new Date(date)
 
 for(let i=-3;i<=3;i++){
@@ -196,9 +201,10 @@ for(let i=-3;i<=3;i++){
 const newDate = new Date(baseDate)
 newDate.setDate(baseDate.getDate()+i)
 
-const formatted = newDate.toISOString().split("T")[0]
+const formatted =
+newDate.toISOString().split("T")[0]
 
-const flights = await searchFlights(from,to,formatted,token)
+const flights = await searchFlights(from,to,formatted)
 
 if(flights){
 allFlights = allFlights.concat(flights)
@@ -206,12 +212,13 @@ allFlights = allFlights.concat(flights)
 
 }
 
-if(!allFlights.length){
+if(!allFlights || allFlights.length === 0){
 
 document.getElementById("results").innerHTML =
 "No flights found for this route."
 
 return
+
 }
 
 renderFlights(allFlights)
@@ -226,6 +233,7 @@ results.innerHTML = ""
 flights.forEach((flight,index)=>{
 
 const itinerary = flight.itineraries[0]
+
 const segments = itinerary.segments
 
 const airline = segments[0].carrierCode
@@ -233,11 +241,16 @@ const airline = segments[0].carrierCode
 const logo =
 `https://content.airhex.com/content/logos/airlines_${airline}_200_200_s.png`
 
-const departure = segments[0].departure.at.slice(11,16)
-const arrival = segments[segments.length-1].arrival.at.slice(11,16)
+const departure =
+segments[0].departure.at.slice(11,16)
+
+const arrival =
+segments[segments.length-1].arrival.at.slice(11,16)
 
 const stops = segments.length-1
+
 const duration = itinerary.duration.replace("PT","")
+
 const price = flight.price.total
 
 results.innerHTML += `
@@ -253,22 +266,38 @@ results.innerHTML += `
 <b>${airline}</b>
 
 <div class="flightInfo">
-${departure} → ${arrival}<br>
-Duration: ${duration}<br>
+
+${departure} → ${arrival}
+
+<br>
+
+Duration: ${duration}
+
+<br>
+
 Stops: ${stops}
+
 </div>
 
-<button class="detailsBtn" onclick="showDetails(${index})">Details</button>
+<button class="detailsBtn" onclick="showDetails(${index})">
+Details
+</button>
 
 <button class="detailsBtn"
-onclick="buyFlight('${segments[0].departure.iataCode}','${segments[segments.length-1].arrival.iataCode}','${segments[0].departure.at}')">
+onclick="buyFlight('${segments[0].departure.iataCode}',
+'${segments[segments.length-1].arrival.iataCode}')">
 Buy ticket
 </button>
 
 </div>
+
 </div>
 
-<div class="price">€${price}</div>
+<div class="price">
+
+€${price}
+
+</div>
 
 </div>
 
@@ -281,28 +310,42 @@ Buy ticket
 function showDetails(index){
 
 const flight = allFlights[index]
+
 const segments = flight.itineraries[0].segments
 
-let html=""
+let html = ""
 
 segments.forEach(seg=>{
 
 html += `
-<b>${seg.departure.iataCode}</b> ${seg.departure.at}
+
+<b>${seg.departure.iataCode}</b>
+${seg.departure.at}
+
 →
-<b>${seg.arrival.iataCode}</b> ${seg.arrival.at}
-<br>Aircraft: ${seg.aircraft.code}<br><br>
+
+<b>${seg.arrival.iataCode}</b>
+${seg.arrival.at}
+
+<br>
+Aircraft: ${seg.aircraft.code}
+
+<br><br>
+
 `
 
 })
 
 document.getElementById("modalContent").innerHTML = html
+
 document.getElementById("flightModal").style.display="flex"
 
 }
 
 function closeModal(){
+
 document.getElementById("flightModal").style.display="none"
+
 }
 
 function durationToMinutes(duration){
@@ -314,26 +357,44 @@ h = h ? parseInt(h[1]) : 0
 m = m ? parseInt(m[1]) : 0
 
 return h*60 + m
+
 }
 
 function sortFlights(type){
 
 if(type==="cheap"){
-allFlights.sort((a,b)=>parseFloat(a.price.total)-parseFloat(b.price.total))
+
+allFlights.sort((a,b)=>
+parseFloat(a.price.total) - parseFloat(b.price.total)
+)
+
 }
 
 if(type==="fast"){
+
 allFlights.sort((a,b)=>
-durationToMinutes(a.itineraries[0].duration)-
-durationToMinutes(b.itineraries[0].duration))
+durationToMinutes(a.itineraries[0].duration) -
+durationToMinutes(b.itineraries[0].duration)
+)
+
 }
 
 if(type==="best"){
+
 allFlights.sort((a,b)=>{
-const scoreA=parseFloat(a.price.total)+a.itineraries[0].segments.length*30
-const scoreB=parseFloat(b.price.total)+b.itineraries[0].segments.length*30
+
+const scoreA =
+parseFloat(a.price.total) +
+a.itineraries[0].segments.length*30
+
+const scoreB =
+parseFloat(b.price.total) +
+b.itineraries[0].segments.length*30
+
 return scoreA-scoreB
+
 })
+
 }
 
 renderFlights(allFlights)
@@ -344,23 +405,41 @@ function goHome(){
 window.location="index.html"
 }
 
-function buyFlight(from,to,departureTime){
-
-const affiliate="https://www.aviasales.com"
-
-const date=new Date(departureTime)
-
-const day=String(date.getDate()).padStart(2,'0')
-const month=String(date.getMonth()+1).padStart(2,'0')
-
-const search=`/search/${from}${to}${day}${month}`
-
-window.open(affiliate+search,"_blank","noopener")
-
-}
-
 loadFlights()
 
+function buyFlight(from,to){
+
+const affiliate = "https://aviasales.tpo.li/AV0q9qVL"
+
+const date = new Date()
+const day = String(date.getDate()).padStart(2,'0')
+const month = String(date.getMonth()+1).padStart(2,'0')
+
+const search = `/search/${from}${to}${day}${month}1`
+
+window.open(affiliate + search, "_blank")
+
+}
+function getCheapestByDate(flights){
+
+const prices = {}
+
+flights.forEach(flight=>{
+
+const date =
+flight.itineraries[0].segments[0].departure.at.split("T")[0]
+
+const price = parseFloat(flight.price.total)
+
+if(!prices[date] || price < prices[date]){
+prices[date] = price
+}
+
+})
+
+return prices
+
+}
 </script>
 
 </body>
