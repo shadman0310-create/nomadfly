@@ -91,7 +91,11 @@ div.className="flightCard"
 div.innerHTML = `
 <div class="flightRoute">${flight.from} → ${flight.to}</div>
 <div class="flightPrice">💰 ${flight.price}</div>
-<button class="viewBtn">View</button>
+
+<button class="viewBtn"
+onclick="viewFlight('${flight.from}','${flight.to}')">
+View
+</button>
 `
 
 list.appendChild(div)
@@ -99,7 +103,18 @@ list.appendChild(div)
 })
 
 }
+function viewFlight(from,to){
 
+window.location =
+`results.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+
+}
+
+function goHome(){
+
+window.location="index.html"
+
+}
 </script>
 
 <style>
@@ -223,7 +238,9 @@ Username:
 
 </div>
 
-<button class="homeBtn" onclick="goHome()">⬅ Back to Home</button>
+<button class="homeBtn" onclick="goHome()">
+⬅ Back to Home
+</button>
 
 <button class="logoutBtn" onclick="logout()">Logout</button>
 
