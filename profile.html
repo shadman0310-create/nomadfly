@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>NomadFly Profile</title>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signOut }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAyAu8ofSXIgx4LAIGFVnMJL9-xnQIzpa4",
+  authDomain: "nomadfly.firebaseapp.com",
+  projectId: "nomadfly",
+  storageBucket: "nomadfly.firebasestorage.app",
+  messagingSenderId: "139421378249",
+  appId: "1:139421378249:web:813b81d31b879a2e4a4f18",
+  measurementId: "G-R1XD9Q665C"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+onAuthStateChanged(auth, async (user)=>{
+
+if(!user){
+
+window.location="index.html"
+return
+
+}
+
+const userRef = doc(db,"users",user.uid)
+const userSnap = await getDoc(userRef)
+
+const data = userSnap.data()
+
+document.getElementById("email").innerText = data.email
+document.getElementById("username").value = data.username
+
+loadSavedFlights(user.uid)
+
+})
+
+async function saveUsername(){
+
+const user = auth.currentUser
+const newName = document.getElementById("username").value
+
+await setDoc(doc(db,"users",user.uid),{
+username:newName
+},{merge:true})
+
+alert("Username updated")
+
+}
+
+async function logout(){
+
+await signOut(auth)
+
+window.location="index.html"
+
+}
+
+async function loadSavedFlights(uid){
+
+const flightsRef = collection(db,"users",uid,"savedFlights")
+const flightsSnap = await getDocs(flightsRef)
+
+const list = document.getElementById("savedFlights")
+
+list.innerHTML=""
+
+flightsSnap.forEach(doc=>{
+
+const flight = doc.data()
+
+const div = document.createElement("div")
+
+div.className="flightCard"
+
+div.innerHTML = `
+<div><b>${flight.from}</b> → <b>${flight.to}</b></div>
+<div>💰 ${flight.price}</div>
+`
+
+list.appendChild(div)
+
+})
+
+}
+
+</script>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b1b36;
+color:white;
+margin:0;
+padding:40px;
+}
+
+h1{
+margin-bottom:30px;
+}
+
+.card{
+background:#1c2a44;
+padding:20px;
+border-radius:12px;
+margin-bottom:20px;
+max-width:500px;
+}
+
+input{
+padding:8px;
+border-radius:6px;
+border:none;
+margin-top:5px;
+}
+
+button{
+padding:8px 14px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-top:10px;
+}
+
+.saveBtn{
+background:#38bdf8;
+color:black;
+}
+
+.logoutBtn{
+background:#ef4444;
+color:white;
+}
+
+.flightCard{
+background:#111c30;
+padding:12px;
+border-radius:8px;
+margin-top:10px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>👤 Profile</h1>
+
+<div class="card">
+
+<h3>Account</h3>
+
+Email:
+<div id="email"></div>
+
+<br>
+
+Username:
+
+<br>
+
+<input id="username">
+
+<br>
+
+<button class="saveBtn" onclick="saveUsername()">Save username</button>
+
+</div>
+
+<div class="card">
+
+<h3>Saved Flights</h3>
+
+<div id="savedFlights"></div>
+
+</div>
+
+<button class="logoutBtn" onclick="logout()">Logout</button>
+
+</body>
+</html>
