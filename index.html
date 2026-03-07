@@ -348,7 +348,7 @@ One way flight
 
 <div class="row">
 
-<input type="date" id="depart">
+<input type="date" id="depart" min="">
 <input type="date" id="returnDate">
 
 </div>
@@ -551,24 +551,40 @@ price:price
 alert("Flight saved")
 
 }
+const departInput = document.getElementById("depart")
+const returnInput = document.getElementById("returnDate")
+
+departInput.addEventListener("change", () => {
+
+const departDate = departInput.value
+
+returnInput.min = departDate
+
+if(returnInput.value < departDate){
+returnInput.value = ""
+}
+
+})
+const today = new Date().toISOString().split("T")[0]
+
+document.getElementById("depart").min = today
+document.getElementById("returnDate").min = today
 function searchFlights(){
 
 const from = document.getElementById("from").value
 const to = document.getElementById("to").value
+const date = document.getElementById("depart").value
 
-if(!from || !to){
+if(!from || !to || !date){
 
-alert("Please enter departure and destination airports")
-
+alert("Please enter departure, destination and date")
 return
 
 }
 
-window.location =
-`results.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+window.location = `results.html?from=${from}&to=${to}&date=${date}`
 
 }
-
 function limitPassengers(){
 
 const adults = Number(document.getElementById("adults").value)
