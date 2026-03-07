@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Saved Flights</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b1b36;
+color:white;
+padding:40px;
+}
+
+.flightCard{
+background:#1c2a44;
+padding:20px;
+border-radius:10px;
+margin-bottom:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Saved Flights</h1>
+
+<div id="flights"></div>
+
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, getDocs }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+apiKey: "AIzaSyAyAu8ofSXIgx4LAIGFVnMJL9-xnQIzpa4",
+authDomain: "nomadfly.firebaseapp.com",
+projectId: "nomadfly",
+storageBucket: "nomadfly.firebasestorage.app",
+messagingSenderId: "139421378249",
+appId: "1:139421378249:web:813b81d31b879a2e4a4f18"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+onAuthStateChanged(auth, async (user)=>{
+
+if(!user){
+window.location="index.html"
+return
+}
+
+const flightsRef = collection(db,"users",user.uid,"savedFlights")
+const flightsSnap = await getDocs(flightsRef)
+
+const container=document.getElementById("flights")
+
+flightsSnap.forEach(doc=>{
+
+const flight=doc.data()
+
+const div=document.createElement("div")
+
+div.className="flightCard"
+
+div.innerHTML=`
+<div>
+<b>${flight.from} → ${flight.to}</b>
+<br>
+💰 ${flight.price}
+</div>
+
+<button onclick="viewFlight('${flight.from}','${flight.to}')">
+View
+</button>
+`
+
+container.appendChild(div)
+
+})
+
+})
+
+window.viewFlight=function(from,to){
+
+window.location=`results.html?from=${from}&to=${to}`
+
+}
+
+</script>
+
+</body>
+
+</html>
