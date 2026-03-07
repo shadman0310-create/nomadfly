@@ -192,7 +192,25 @@ return
 const from = fromText.match(/\((.*?)\)/)[1]
 const to = toText.match(/\((.*?)\)/)[1]
 
-allFlights = await searchFlights(from,to,date)
+allFlights = []
+
+const baseDate = new Date(date)
+
+for(let i=-3;i<=3;i++){
+
+const newDate = new Date(baseDate)
+newDate.setDate(baseDate.getDate()+i)
+
+const formatted =
+newDate.toISOString().split("T")[0]
+
+const flights = await searchFlights(from,to,formatted)
+
+if(flights){
+allFlights = allFlights.concat(flights)
+}
+
+}
 
 if(!allFlights || allFlights.length === 0){
 
@@ -263,6 +281,12 @@ Stops: ${stops}
 
 <button class="detailsBtn" onclick="showDetails(${index})">
 Details
+</button>
+
+<button class="detailsBtn"
+onclick="buyFlight('${segments[0].departure.iataCode}',
+'${segments[segments.length-1].arrival.iataCode}')">
+Buy ticket
 </button>
 
 </div>
@@ -383,6 +407,39 @@ window.location="index.html"
 
 loadFlights()
 
+function buyFlight(from,to){
+
+const affiliate = "https://aviasales.tpo.li/AV0q9qVL"
+
+const date = new Date()
+const day = String(date.getDate()).padStart(2,'0')
+const month = String(date.getMonth()+1).padStart(2,'0')
+
+const search = `/search/${from}${to}${day}${month}1`
+
+window.open(affiliate + search, "_blank")
+
+}
+function getCheapestByDate(flights){
+
+const prices = {}
+
+flights.forEach(flight=>{
+
+const date =
+flight.itineraries[0].segments[0].departure.at.split("T")[0]
+
+const price = parseFloat(flight.price.total)
+
+if(!prices[date] || price < prices[date]){
+prices[date] = price
+}
+
+})
+
+return prices
+
+}
 </script>
 
 </body>
