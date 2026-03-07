@@ -18,23 +18,47 @@ padding:40px;
 .flightCard{
 background:#1c2a44;
 padding:20px;
-border-radius:10px;
+border-radius:12px;
 margin-bottom:15px;
 display:flex;
 justify-content:space-between;
 align-items:center;
+transition:0.2s;
 }
 
-button{
-padding:8px 12px;
+.flightCard:hover{
+transform:scale(1.02);
+background:#24355c;
+}
+
+.airlineBlock{
+display:flex;
+align-items:center;
+gap:12px;
+}
+
+.airlineLogo{
+width:36px;
+height:36px;
+}
+
+.flightInfo{
+font-size:14px;
+opacity:0.9;
+}
+
+.price{
+font-size:20px;
+font-weight:bold;
+}
+
+.detailsBtn{
+background:#38bdf8;
 border:none;
+padding:8px 12px;
 border-radius:6px;
 cursor:pointer;
-}
-
-.saveBtn{
-background:#38bdf8;
-color:black;
+margin-top:5px;
 }
 
 .homeBtn{
@@ -47,11 +71,34 @@ cursor:pointer;
 margin-bottom:20px;
 }
 
-.airlineLogo{
-width:32px;
-height:32px;
-margin-right:10px;
+.sortBtn{
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+margin-right:6px;
 }
+
+#flightModal{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
+align-items:center;
+justify-content:center;
+}
+
+.modalBox{
+background:#1c2a44;
+padding:30px;
+border-radius:12px;
+max-width:600px;
+width:90%;
+}
+
 </style>
 
 </head>
@@ -59,18 +106,37 @@ margin-right:10px;
 <body>
 
 <h1>Flight Results</h1>
+
 <button class="homeBtn" onclick="goHome()">⬅ Back to Home</button>
+
 <div style="margin-bottom:20px;">
 Sort by:
-<button onclick="sortFlights('cheap')">Cheapest</button>
-<button onclick="sortFlights('fast')">Fastest</button>
-<button onclick="sortFlights('best')">Best</button>
+<button class="sortBtn" onclick="sortFlights('cheap')">Cheapest</button>
+<button class="sortBtn" onclick="sortFlights('fast')">Fastest</button>
+<button class="sortBtn" onclick="sortFlights('best')">Best</button>
 </div>
+
 <div id="results"></div>
+
+<div id="flightModal">
+<div class="modalBox">
+
+<h2>Flight Details</h2>
+
+<div id="modalContent"></div>
+
+<br>
+<button onclick="closeModal()">Close</button>
+
+</div>
+</div>
+
 <script>
 
-const API_KEY = "iHMy08j1HiFxJSbCdvEUJsrl6fp8zYRq"
-const API_SECRET = "erBUAyAYLhxTLbCt"
+const API_KEY = "YOUR_API_KEY"
+const API_SECRET = "YOUR_SECRET"
+
+let allFlights = []
 
 async function getToken(){
 
@@ -106,8 +172,6 @@ return data.data
 
 }
 
-let allFlights = []
-
 async function loadFlights(){
 
 const params = new URLSearchParams(window.location.search)
@@ -115,10 +179,20 @@ const params = new URLSearchParams(window.location.search)
 const fromText = params.get("from")
 const toText = params.get("to")
 
+if(!fromText || !toText){
+
+document.getElementById("results").innerHTML =
+"Please search flights from the home page."
+
+return
+
+}
+
 const from = fromText.match(/\((.*?)\)/)[1]
 const to = toText.match(/\((.*?)\)/)[1]
 
 allFlights = await searchFlights(from,to)
+
 if(!allFlights || allFlights.length === 0){
 
 document.getElementById("results").innerHTML =
@@ -127,46 +201,158 @@ document.getElementById("results").innerHTML =
 return
 
 }
+
 renderFlights(allFlights)
 
 }
 
-loadFlights()
+function renderFlights(flights){
+
+const results = document.getElementById("results")
+results.innerHTML = ""
+
+flights.forEach((flight,index)=>{
+
+const itinerary = flight.itineraries[0]
+
+const segments = itinerary.segments
+
+const airline = segments[0].carrierCode
+
+const logo =
+`https://content.airhex.com/content/logos/airlines_${airline}_200_200_s.png`
+
+const departure =
+segments[0].departure.at.slice(11,16)
+
+const arrival =
+segments[segments.length-1].arrival.at.slice(11,16)
+
+const stops = segments.length-1
+
+const duration = itinerary.duration.replace("PT","")
+
+const price = flight.price.total
+
+results.innerHTML += `
+
+<div class="flightCard">
+
+<div class="airlineBlock">
+
+<img class="airlineLogo" src="${logo}">
+
+<div>
+
+<b>${airline}</b>
+
+<div class="flightInfo">
+
+${departure} → ${arrival}
+
+<br>
+
+Duration: ${duration}
+
+<br>
+
+Stops: ${stops}
+
+</div>
+
+<button class="detailsBtn" onclick="showDetails(${index})">
+Details
+</button>
+
+</div>
+
+</div>
+
+<div class="price">
+
+€${price}
+
+</div>
+
+</div>
+
+`
+
+})
+
+}
+
+function showDetails(index){
+
+const flight = allFlights[index]
+
+const segments = flight.itineraries[0].segments
+
+let html = ""
+
+segments.forEach(seg=>{
+
+html += `
+
+<b>${seg.departure.iataCode}</b>
+${seg.departure.at}
+
+→
+
+<b>${seg.arrival.iataCode}</b>
+${seg.arrival.at}
+
+<br>
+Aircraft: ${seg.aircraft.code}
+
+<br><br>
+
+`
+
+})
+
+document.getElementById("modalContent").innerHTML = html
+
+document.getElementById("flightModal").style.display="flex"
+
+}
+
+function closeModal(){
+
+document.getElementById("flightModal").style.display="none"
+
+}
+
+function sortFlights(type){
+
+if(type==="cheap"){
+allFlights.sort((a,b)=>a.price.total-b.price.total)
+}
+
+if(type==="fast"){
+allFlights.sort((a,b)=>
+a.itineraries[0].duration.localeCompare(b.itineraries[0].duration)
+)
+}
+
+if(type==="best"){
+allFlights.sort((a,b)=>
+(a.price.total + a.itineraries[0].segments.length) -
+(b.price.total + b.itineraries[0].segments.length)
+)
+}
+
+renderFlights(allFlights)
+
+}
 
 function goHome(){
 window.location="index.html"
 }
 
+loadFlights()
+
 </script>
-<div id="flightModal" style="
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:rgba(0,0,0,0.7);
-align-items:center;
-justify-content:center;
-">
 
-<div style="
-background:#1c2a44;
-padding:30px;
-border-radius:12px;
-max-width:600px;
-width:90%;
-">
-
-<h2>Flight Details</h2>
-
-<div id="modalContent"></div>
-
-<br>
-
-<button onclick="closeModal()">Close</button>
-
-</div>
-</div>
 </body>
 </html>
