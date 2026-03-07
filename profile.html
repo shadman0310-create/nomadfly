@@ -31,10 +31,8 @@ const db = getFirestore(app);
 onAuthStateChanged(auth, async (user)=>{
 
 if(!user){
-
 window.location="index.html"
 return
-
 }
 
 const userRef = doc(db,"users",user.uid)
@@ -65,9 +63,12 @@ alert("Username updated")
 async function logout(){
 
 await signOut(auth)
-
 window.location="index.html"
 
+}
+
+async function goHome(){
+window.location="index.html"
 }
 
 async function loadSavedFlights(uid){
@@ -88,8 +89,9 @@ const div = document.createElement("div")
 div.className="flightCard"
 
 div.innerHTML = `
-<div><b>${flight.from}</b> → <b>${flight.to}</b></div>
-<div>💰 ${flight.price}</div>
+<div class="flightRoute">${flight.from} → ${flight.to}</div>
+<div class="flightPrice">💰 ${flight.price}</div>
+<button class="viewBtn">View</button>
 `
 
 list.appendChild(div)
@@ -107,10 +109,18 @@ font-family:Arial;
 background:#0b1b36;
 color:white;
 margin:0;
-padding:40px;
+display:flex;
+justify-content:center;
+align-items:flex-start;
+padding-top:60px;
+}
+
+.container{
+width:500px;
 }
 
 h1{
+text-align:center;
 margin-bottom:30px;
 }
 
@@ -119,18 +129,18 @@ background:#1c2a44;
 padding:20px;
 border-radius:12px;
 margin-bottom:20px;
-max-width:500px;
 }
 
 input{
-padding:8px;
+padding:10px;
 border-radius:6px;
 border:none;
 margin-top:5px;
+width:100%;
 }
 
 button{
-padding:8px 14px;
+padding:10px 14px;
 border:none;
 border-radius:6px;
 cursor:pointer;
@@ -145,13 +155,37 @@ color:black;
 .logoutBtn{
 background:#ef4444;
 color:white;
+width:100%;
+}
+
+.homeBtn{
+background:#38bdf8;
+color:black;
+width:100%;
 }
 
 .flightCard{
 background:#111c30;
-padding:12px;
+padding:14px;
 border-radius:8px;
 margin-top:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+.flightRoute{
+font-weight:bold;
+}
+
+.flightPrice{
+opacity:0.8;
+}
+
+.viewBtn{
+background:#38bdf8;
+color:black;
+padding:6px 10px;
 }
 
 </style>
@@ -159,6 +193,8 @@ margin-top:10px;
 </head>
 
 <body>
+
+<div class="container">
 
 <h1>👤 Profile</h1>
 
@@ -173,11 +209,7 @@ Email:
 
 Username:
 
-<br>
-
 <input id="username">
-
-<br>
 
 <button class="saveBtn" onclick="saveUsername()">Save username</button>
 
@@ -191,7 +223,11 @@ Username:
 
 </div>
 
+<button class="homeBtn" onclick="goHome()">⬅ Back to Home</button>
+
 <button class="logoutBtn" onclick="logout()">Logout</button>
+
+</div>
 
 </body>
 </html>
