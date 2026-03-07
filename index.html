@@ -352,17 +352,17 @@ One way flight
 
 <div class="row">
 <label>Adults (16+)</label>
-<input type="number" id="adults" value="1" min="1">
+<input type="number" id="adults" value="1" min="1" max="10" onchange="limitPassengers()">
 </div>
 
 <div class="row">
 <label>Children (2-15)</label>
-<input type="number" id="children" value="0">
+<input type="number" id="children" value="0" min="0" max="10" onchange="limitPassengers()">
 </div>
 
 <div class="row">
 <label>Infants (0-2)</label>
-<input type="number" id="infants" value="0">
+<input type="number" id="infants" value="0" min="0" max="10" onchange="limitPassengers()">
 </div>
 
 <div class="row">
@@ -547,8 +547,35 @@ function searchFlights(){
 const from = document.getElementById("from").value
 const to = document.getElementById("to").value
 
+if(!from || !to){
+
+alert("Please enter departure and destination airports")
+
+return
+
+}
+
 window.location =
 `results.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+
+}
+
+function limitPassengers(){
+
+const adults = Number(document.getElementById("adults").value)
+const children = Number(document.getElementById("children").value)
+const infants = Number(document.getElementById("infants").value)
+
+const total = adults + children + infants
+
+if(total > 10){
+
+alert("Maximum 10 passengers per booking")
+
+document.getElementById("children").value = 0
+document.getElementById("infants").value = 0
+
+}
 
 }
 </script>
