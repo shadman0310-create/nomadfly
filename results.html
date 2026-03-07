@@ -119,7 +119,14 @@ const from = fromText.match(/\((.*?)\)/)[1]
 const to = toText.match(/\((.*?)\)/)[1]
 
 allFlights = await searchFlights(from,to)
+if(!allFlights || allFlights.length === 0){
 
+document.getElementById("results").innerHTML =
+"No flights found for this route."
+
+return
+
+}
 renderFlights(allFlights)
 
 }
