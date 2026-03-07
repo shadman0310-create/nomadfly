@@ -281,6 +281,16 @@ cursor:pointer;
 color:#38bdf8;
 }
 
+.flightCard{
+background:#111c30;
+padding:14px;
+border-radius:8px;
+margin-top:10px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
 </style>
 
 </head>
@@ -370,7 +380,23 @@ One way flight
 </div>
 
 <button class="search-btn">Search Flights</button>
+<div style="margin-top:20px">
 
+<div class="flightCard">
+
+<div>
+<b>VNO → BCN</b>
+<br>
+💰 63€
+</div>
+
+<button onclick="saveFlight('VNO','BCN','63€')">
+❤️ Save
+</button>
+
+</div>
+
+</div>
 </div>
 
 </div>
@@ -391,6 +417,8 @@ const panel=document.getElementById("passengerPanel")
 panel.style.display=panel.style.display==="block"?"none":"block"
 
 }
+
+
 
 function updatePassengerSummary(){
 
@@ -489,6 +517,27 @@ let to=document.getElementById("to")
 let temp=from.value
 from.value=to.value
 to.value=temp
+
+}
+
+async function saveFlight(from,to,price){
+
+const user = auth.currentUser
+
+if(!user){
+alert("Login first to save flights")
+return
+}
+
+await setDoc(doc(db,"users",user.uid,"savedFlights",Date.now().toString()),{
+
+from:from,
+to:to,
+price:price
+
+})
+
+alert("Flight saved")
 
 }
 
