@@ -47,6 +47,11 @@ cursor:pointer;
 margin-bottom:20px;
 }
 
+.airlineLogo{
+width:32px;
+height:32px;
+margin-right:10px;
+}
 </style>
 
 </head>
@@ -55,56 +60,106 @@ margin-bottom:20px;
 
 <h1>Flight Results</h1>
 <button class="homeBtn" onclick="goHome()">⬅ Back to Home</button>
-
+<div style="margin-bottom:20px;">
+Sort by:
+<button onclick="sortFlights('cheap')">Cheapest</button>
+<button onclick="sortFlights('fast')">Fastest</button>
+<button onclick="sortFlights('best')">Best</button>
+</div>
 <div id="results"></div>
-
 <script>
+
+const API_KEY = "iHMy08j1HiFxJSbCdvEUJsrl6fp8zYRq"
+const API_SECRET = "erBUAyAYLhxTLbCt"
+
+async function getToken(){
+
+const response = await fetch(
+"https://test.api.amadeus.com/v1/security/oauth2/token",
+{
+method:"POST",
+headers:{
+"Content-Type":"application/x-www-form-urlencoded"
+},
+body:`grant_type=client_credentials&client_id=${API_KEY}&client_secret=${API_SECRET}`
+})
+
+const data = await response.json()
+return data.access_token
+
+}
+
+async function searchFlights(from,to){
+
+const token = await getToken()
+
+const response = await fetch(
+`https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=2026-04-01&adults=1`,
+{
+headers:{
+Authorization:`Bearer ${token}`
+}
+})
+
+const data = await response.json()
+return data.data
+
+}
+
+let allFlights = []
+
+async function loadFlights(){
 
 const params = new URLSearchParams(window.location.search)
 
-const from = params.get("from")
-const to = params.get("to")
+const fromText = params.get("from")
+const toText = params.get("to")
 
-const results = document.getElementById("results")
+const from = fromText.match(/\((.*?)\)/)[1]
+const to = toText.match(/\((.*?)\)/)[1]
 
-const flights = [
+allFlights = await searchFlights(from,to)
 
-{airline:"Ryanair",price:"45€"},
-{airline:"WizzAir",price:"52€"},
-{airline:"AirBaltic",price:"80€"}
-
-]
-
-flights.forEach(flight=>{
-
-const div = document.createElement("div")
-
-div.className="flightCard"
-
-div.innerHTML = `
-<div>
-<b>${from} → ${to}</b>
-<br>
-<b>${from} → ${to}</b>
-${flight.airline}
-<br>
-💰 ${flight.price}
-</div>
-
-<button class="saveBtn">
-❤️ Save
-</button>
-`
-
-results.appendChild(div)
-
-})
-function goHome(){
-
-window.location="index.html"
+renderFlights(allFlights)
 
 }
-</script>
 
+loadFlights()
+
+function goHome(){
+window.location="index.html"
+}
+
+</script>
+<div id="flightModal" style="
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:rgba(0,0,0,0.7);
+align-items:center;
+justify-content:center;
+">
+
+<div style="
+background:#1c2a44;
+padding:30px;
+border-radius:12px;
+max-width:600px;
+width:90%;
+">
+
+<h2>Flight Details</h2>
+
+<div id="modalContent"></div>
+
+<br>
+
+<button onclick="closeModal()">Close</button>
+
+</div>
+</div>
 </body>
 </html>
