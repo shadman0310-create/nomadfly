@@ -155,10 +155,7 @@ return data.access_token
 
 }
 
-async function searchFlights(from,to,date){
-
-const token = await getToken()
-
+async function searchFlights(from,to,date,token){
 const response = await fetch(
 `https://test.api.amadeus.com/v2/shopping/flight-offers?originLocationCode=${from}&destinationLocationCode=${to}&departureDate=${date}&adults=1`,
 {
@@ -193,7 +190,7 @@ const from = fromText.match(/\((.*?)\)/)[1]
 const to = toText.match(/\((.*?)\)/)[1]
 
 allFlights = []
-
+const token = await getToken()
 const baseDate = new Date(date)
 
 for(let i=-3;i<=3;i++){
@@ -204,7 +201,7 @@ newDate.setDate(baseDate.getDate()+i)
 const formatted =
 newDate.toISOString().split("T")[0]
 
-const flights = await searchFlights(from,to,formatted)
+const flights = await searchFlights(from,to,formatted,token)
 
 if(flights){
 allFlights = allFlights.concat(flights)
@@ -283,9 +280,7 @@ Stops: ${stops}
 Details
 </button>
 
-<button class="detailsBtn"
-onclick="buyFlight('${segments[0].departure.iataCode}',
-'${segments[segments.length-1].arrival.iataCode}')">
+<button class="detailsBtn" onclick="buyFlight('${segments[0].departure.iataCode}','${segments[segments.length-1].arrival.iataCode}','${segments[0].departure.at}')">
 Buy ticket
 </button>
 
@@ -407,17 +402,18 @@ window.location="index.html"
 
 loadFlights()
 
-function buyFlight(from,to){
+function buyFlight(from,to,departureTime){
 
 const affiliate = "https://aviasales.tpo.li/AV0q9qVL"
 
-const date = new Date()
+const date = new Date(departureTime)
+
 const day = String(date.getDate()).padStart(2,'0')
 const month = String(date.getMonth()+1).padStart(2,'0')
 
 const search = `/search/${from}${to}${day}${month}1`
 
-window.open(affiliate + search, "_blank")
+window.open(affiliate + search, "_blank", "noopener")
 
 }
 function getCheapestByDate(flights){
