@@ -229,6 +229,24 @@ background:#ef4444;
 color:white;
 }
 
+.savedFlightsBtn{
+width:100%;
+background:linear-gradient(135deg,#38bdf8,#0ea5e9);
+color:black;
+font-weight:bold;
+padding:12px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+margin-top:10px;
+transition:0.2s;
+font-size:15px;
+}
+
+.savedFlightsBtn:hover{
+transform:scale(1.03);
+background:linear-gradient(135deg,#0ea5e9,#0284c7);
+}
 </style>
 
 </head>
@@ -256,17 +274,9 @@ Username:
 
 </div>
 
-<div class="card">
-
-<h3>Saved Flights</h3>
-
-<div id="savedFlights"></div>
-
-</div>
-
 <button class="homeBtn" onclick="goHome()">⬅ Back to Home</button>
-<button class="saveBtn" onclick="goSavedFlights()">
-Saved Flights
+<button class="savedFlightsBtn" onclick="goSavedFlights()">
+❤️ Saved Flights
 </button>
 <button class="logoutBtn" onclick="logout()">Logout</button>
 
