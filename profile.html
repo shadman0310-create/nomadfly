@@ -11,22 +11,24 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, onAuthStateChanged, signOut }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, collection, getDocs }
+import { getFirestore, doc, getDoc, setDoc, collection, getDocs, deleteDoc }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAyAu8ofSXIgx4LAIGFVnMJL9-xnQIzpa4",
-  authDomain: "nomadfly.firebaseapp.com",
-  projectId: "nomadfly",
-  storageBucket: "nomadfly.firebasestorage.app",
-  messagingSenderId: "139421378249",
-  appId: "1:139421378249:web:813b81d31b879a2e4a4f18",
-  measurementId: "G-R1XD9Q665C"
+apiKey: "AIzaSyAyAu8ofSXIgx4LAIGFVnMJL9-xnQIzpa4",
+authDomain: "nomadfly.firebaseapp.com",
+projectId: "nomadfly",
+storageBucket: "nomadfly.firebasestorage.app",
+messagingSenderId: "139421378249",
+appId: "1:139421378249:web:813b81d31b879a2e4a4f18",
+measurementId: "G-R1XD9Q665C"
 };
 
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
+
+let currentUID = null;
 
 onAuthStateChanged(auth, async (user)=>{
 
@@ -34,6 +36,8 @@ if(!user){
 window.location="index.html"
 return
 }
+
+currentUID = user.uid;
 
 const userRef = doc(db,"users",user.uid)
 const userSnap = await getDoc(userRef)
@@ -47,7 +51,7 @@ loadSavedFlights(user.uid)
 
 })
 
-async function saveUsername(){
+window.saveUsername = async function(){
 
 const user = auth.currentUser
 const newName = document.getElementById("username").value
@@ -60,15 +64,30 @@ alert("Username updated")
 
 }
 
-async function logout(){
+window.logout = async function(){
 
 await signOut(auth)
 window.location="index.html"
 
 }
 
-async function goHome(){
+window.goHome = function(){
 window.location="index.html"
+}
+
+window.viewFlight = function(from,to){
+
+window.location =
+`results.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+
+}
+
+window.removeFlight = async function(id){
+
+await deleteDoc(doc(db,"users",currentUID,"savedFlights",id))
+
+loadSavedFlights(currentUID)
+
 }
 
 async function loadSavedFlights(uid){
@@ -80,22 +99,25 @@ const list = document.getElementById("savedFlights")
 
 list.innerHTML=""
 
-flightsSnap.forEach(doc=>{
+flightsSnap.forEach(docSnap=>{
 
-const flight = doc.data()
+const flight = docSnap.data()
+const id = docSnap.id
 
 const div = document.createElement("div")
 
 div.className="flightCard"
 
 div.innerHTML = `
+<div>
 <div class="flightRoute">${flight.from} → ${flight.to}</div>
 <div class="flightPrice">💰 ${flight.price}</div>
+</div>
 
-<button class="viewBtn"
-onclick="viewFlight('${flight.from}','${flight.to}')">
-View
-</button>
+<div class="flightButtons">
+<button class="viewBtn" onclick="viewFlight('${flight.from}','${flight.to}')">View</button>
+<button class="removeBtn" onclick="removeFlight('${id}')">Remove</button>
+</div>
 `
 
 list.appendChild(div)
@@ -103,18 +125,7 @@ list.appendChild(div)
 })
 
 }
-function viewFlight(from,to){
 
-window.location =
-`results.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
-
-}
-
-function goHome(){
-
-window.location="index.html"
-
-}
 </script>
 
 <style>
@@ -126,12 +137,11 @@ color:white;
 margin:0;
 display:flex;
 justify-content:center;
-align-items:flex-start;
 padding-top:60px;
 }
 
 .container{
-width:500px;
+width:520px;
 }
 
 h1{
@@ -155,28 +165,30 @@ width:100%;
 }
 
 button{
-padding:10px 14px;
+padding:8px 12px;
 border:none;
 border-radius:6px;
 cursor:pointer;
-margin-top:10px;
 }
 
 .saveBtn{
 background:#38bdf8;
 color:black;
+margin-top:10px;
 }
 
 .logoutBtn{
 background:#ef4444;
 color:white;
 width:100%;
+margin-top:10px;
 }
 
 .homeBtn{
 background:#38bdf8;
 color:black;
 width:100%;
+margin-top:10px;
 }
 
 .flightCard{
@@ -197,10 +209,19 @@ font-weight:bold;
 opacity:0.8;
 }
 
+.flightButtons{
+display:flex;
+gap:6px;
+}
+
 .viewBtn{
 background:#38bdf8;
 color:black;
-padding:6px 10px;
+}
+
+.removeBtn{
+background:#ef4444;
+color:white;
 }
 
 </style>
@@ -238,9 +259,7 @@ Username:
 
 </div>
 
-<button class="homeBtn" onclick="goHome()">
-⬅ Back to Home
-</button>
+<button class="homeBtn" onclick="goHome()">⬅ Back to Home</button>
 
 <button class="logoutBtn" onclick="logout()">Logout</button>
 
