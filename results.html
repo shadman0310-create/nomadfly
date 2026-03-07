@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<title>Flight Results</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#0b1b36;
+color:white;
+padding:40px;
+}
+
+.flightCard{
+background:#1c2a44;
+padding:20px;
+border-radius:10px;
+margin-bottom:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+}
+
+button{
+padding:8px 12px;
+border:none;
+border-radius:6px;
+cursor:pointer;
+}
+
+.saveBtn{
+background:#38bdf8;
+color:black;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>Flight Results</h1>
+
+<div id="results"></div>
+
+<script>
+
+const params = new URLSearchParams(window.location.search)
+
+const from = params.get("from")
+const to = params.get("to")
+
+const results = document.getElementById("results")
+
+const flights = [
+
+{airline:"Ryanair",price:"45€"},
+{airline:"WizzAir",price:"52€"},
+{airline:"AirBaltic",price:"80€"}
+
+]
+
+flights.forEach(flight=>{
+
+const div = document.createElement("div")
+
+div.className="flightCard"
+
+div.innerHTML = `
+<div>
+<b>${from} → ${to}</b>
+<br>
+${flight.airline}
+<br>
+💰 ${flight.price}
+</div>
+
+<button class="saveBtn">
+❤️ Save
+</button>
+`
+
+results.appendChild(div)
+
+})
+
+</script>
+
+</body>
+</html>
