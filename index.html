@@ -379,7 +379,9 @@ One way flight
 
 </div>
 
-<button class="search-btn">Search Flights</button>
+<button class="search-btn" onclick="searchFlights()">
+Search Flights
+</button>
 <div style="margin-top:20px">
 
 <div class="flightCard">
@@ -540,7 +542,15 @@ price:price
 alert("Flight saved")
 
 }
+function searchFlights(){
 
+const from = document.getElementById("from").value
+const to = document.getElementById("to").value
+
+window.location =
+`results.html?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}`
+
+}
 </script>
 
 </body>
